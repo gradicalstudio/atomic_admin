@@ -11,7 +11,7 @@ export default function Admin() {
   const [currentTab, setCurrentTab] = useState("dashboard");
   return (
     <div className="flex">
-      <div className="flex bg-black w-1/4 ">
+      <div className="flex bg-black w-1/4">
         <div className="flex flex-col gap-14 w-full">
           <div className="flex justify-center w-full">
             <div className="my-10 flex items-center flex-col gap-14 text-white">
@@ -50,7 +50,7 @@ export default function Admin() {
           </div>
         </div>
       </div>
-      <div className="flex bg-gray-100 w-full px-20 py-10">
+      <div className="flex bg-gray-100 pb-52 w-full px-20 py-10">
         {currentTab === "dashboard" ? (
           <Dashboard />
         ) : currentTab === "enquiry" ? (
