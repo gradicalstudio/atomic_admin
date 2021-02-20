@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import TabHeader from "../../../components/TabHeader";
 import HeroSection from "./HeroSection";
-import { db } from "../../../firebase";
-import Loading from "../../../components/Loading";
+
 import HotDesk from "./HotDesk";
 import DedicatedDesk from "./DedicatedDesk";
 import PrivateOffice from "./PrivateOffice";
@@ -10,23 +9,6 @@ import EventsSection from "./EventsSection";
 
 export default function ContentManagement() {
   const [currentSection, setCurrentSection] = useState("heroSection");
-  const [loading, setLoading] = useState(false);
-  const [pageData, setPageData] = useState(null);
-
-  const fetchAtomicPageDetails = async () => {
-    setLoading(true);
-    let res = await db
-      .collection("atomicLandingPage")
-      .doc("Aw6fT3wFRWFsGqqnjJlt")
-      .get();
-    console.log("Data", res.data());
-    setLoading(false);
-    setPageData(res.data());
-  };
-
-  useEffect(() => {
-    fetchAtomicPageDetails();
-  }, []);
 
   return (
     <div className="w-full flex flex-col gap-14">
@@ -78,25 +60,31 @@ export default function ContentManagement() {
         </button>
       </div>
 
-      {!loading ? (
-        <div className="bg-white px-10 py-10 w-9/12">
-          {currentSection === "heroSection" ? (
-            <HeroSection data={pageData} loading={loading} />
-          ) : currentSection === "hotDesk" ? (
-            <HotDesk data={pageData} loading={loading} />
-          ) : currentSection === "dedicatedDesk" ? (
-            <DedicatedDesk data={pageData} loading={loading} />
-          ) : currentSection === "privateOffice" ? (
-            <PrivateOffice data={pageData} loading={loading} />
-          ) : currentSection === "eventSection" ? (
-            <EventsSection data={pageData} loading={loading} />
-          ) : (
-            <p>Other section</p>
-          )}
-        </div>
-      ) : (
-        <Loading />
-      )}
+      <div className="bg-white px-10 py-10 w-9/12">
+        {currentSection === "heroSection" ? (
+          <HeroSection />
+        ) : currentSection === "hotDesk" ? (
+          <HotDesk />
+        ) : currentSection === "dedicatedDesk" ? (
+          <DedicatedDesk />
+        ) : currentSection === "privateOffice" ? (
+          <PrivateOffice />
+        ) : currentSection === "eventSection" ? (
+          <EventsSection />
+        ) : (
+          <p>Other section</p>
+        )}
+      </div>
     </div>
   );
 }
+
+// : currentSection === "hotDesk" ? (
+//           <HotDesk data={pageData} loading={loading} />
+//         ) : currentSection === "dedicatedDesk" ? (
+//           <DedicatedDesk data={pageData} loading={loading} />
+//         ) : currentSection === "privateOffice" ? (
+//           <PrivateOffice data={pageData} loading={loading} />
+//         ) : currentSection === "eventSection" ? (
+//           <EventsSection data={pageData} loading={loading} />
+//         )

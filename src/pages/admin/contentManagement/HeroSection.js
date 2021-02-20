@@ -1,22 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BsTrash } from "react-icons/bs";
 import { Field, Formik, ErrorMessage, Form } from "formik";
 import * as Yup from "yup";
 import Loading from "../../../components/Loading";
 import { db, storageRef } from "../../../firebase";
 import { toast } from "react-toastify";
-import { BiImageAdd } from "react-icons/bi";
 import { FaHourglassHalf } from "react-icons/fa";
 
 const schema = Yup.object().shape({
   subHeading: Yup.string().nullable().required("Required"),
 });
 
-export default function HeroSection({ data, loading }) {
+export default function HeroSection() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pageData, setPageData] = useState(null);
+  const [isUpdateStatusChanged, setIsUpdateStatusChanged] = useState(null);
 
-  const uploadimage = async (image) => {
+  const [images, setImages] = useState(null);
+
+  const fetchAtomicPageDetails = async () => {
+    setLoading(true);
+    let res = await db
+      .collection("atomicLandingPage")
+      .doc("Aw6fT3wFRWFsGqqnjJlt")
+      .get();
+    console.log("Data", res.data());
+    setLoading(false);
+    setPageData(res.data());
+    setImages(res.data().heroSection.images);
+  };
+
+  useEffect(() => {
+    fetchAtomicPageDetails();
+  }, [isUpdateStatusChanged]);
+
+  const getImageURL = async (image) => {
     var d = new Date();
     var n = d.getTime();
     const fileRef = storageRef.ref("heroSection/images/").child(image.name + n);
@@ -31,25 +51,26 @@ export default function HeroSection({ data, loading }) {
     return url ? url : false;
   };
 
-  const uploadCompanyImages = async (companyImages) => {
+  const uploadImages = async (companyImages) => {
     setImageUploadInProgress(true);
     let noOfImages = Object.keys(companyImages).length;
     let imagesURLStatus = [];
 
     for (let i = 0; i < noOfImages; i++) {
       const image = companyImages[i];
-      let url = await uploadimage(image);
+      let url = await getImageURL(image);
       if (url) {
         db.collection("atomicLandingPage")
           .doc("Aw6fT3wFRWFsGqqnjJlt")
           .update({
             heroSection: {
-              heroSubTitle: data.heroSection.heroSubTitle,
-              images: [...data.heroSection.images, url],
+              heroSubTitle: pageData.heroSection.heroSubTitle,
+              images: [...pageData.heroSection.images, url],
             },
           })
           .then(() => {
             imagesURLStatus.push(url);
+            setIsUpdateStatusChanged(Math.random());
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -61,6 +82,7 @@ export default function HeroSection({ data, loading }) {
     }
     if (imagesURLStatus.length + 1 === noOfImages) {
       setImageUploadInProgress(false);
+
       toast.success("Images uploaded successfully!...");
     } else {
       toast.error("Checking error!");
@@ -69,31 +91,31 @@ export default function HeroSection({ data, loading }) {
   };
 
   const deleteImage = (url) => {
-    data.heroSection.images = data.heroSection.images.filter(
-      (el) => el !== url
-    );
-    console.log("Images", data.heroSection.images);
+    if (window.confirm("Are you sure to delete this image? ")) {
+      setImages(images.filter((el) => el !== url));
+    }
   };
 
-  if (!loading && data) {
+  if (!loading && pageData) {
     return (
       <Formik
         initialValues={{
           subHeading:
-            data && data.heroSection.heroSubTitle
-              ? data.heroSection.heroSubTitle
+            pageData && pageData.heroSection.heroSubTitle
+              ? pageData.heroSection.heroSubTitle
               : "",
         }}
         validationSchema={schema}
         onSubmit={(values) => {
-          if (data.heroSection.images.length > 1) {
+          console.log("Values", pageData.heroSection.images.length);
+          if (images.length >= 1) {
             setIsUpdating(true);
             db.collection("atomicLandingPage")
               .doc("Aw6fT3wFRWFsGqqnjJlt")
               .update({
                 heroSection: {
                   heroSubTitle: values.subHeading,
-                  images: data.heroSection.images,
+                  images: images,
                 },
               })
               .then(() => {
@@ -136,8 +158,8 @@ export default function HeroSection({ data, loading }) {
                 <div className="flex flex-col gap-5">
                   <p className="text-md text-blue-500 font-medium">IMAGES</p>
                   <div className="grid grid-cols-4 gap-5">
-                    {data && data.heroSection
-                      ? data.heroSection.images.map((image) => {
+                    {images
+                      ? images.map((image) => {
                           return (
                             <div>
                               <div className=" h-40 w-40 overflow-auto">
@@ -145,12 +167,13 @@ export default function HeroSection({ data, loading }) {
                               </div>
                               <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
                                 <button
+                                  type="button"
                                   onClick={() => {
-                                    if (data.heroSection.images.length > 1) {
+                                    if (images.length > 1) {
                                       deleteImage(image);
                                     } else {
                                       toast.error(
-                                        "Atleast one photo is required..."
+                                        "At least one image is required..."
                                       );
                                     }
                                   }}
@@ -165,13 +188,12 @@ export default function HeroSection({ data, loading }) {
                       : null}
                   </div>
 
-                  <div className="flex justify-center">
+                  <div className="flex justify-start">
                     <input
                       type="file"
-                      multiple
                       onChange={(e) => {
                         if (e.target && e.target.files) {
-                          uploadCompanyImages(e.target.files);
+                          uploadImages(e.target.files);
                         }
                       }}
                       accept="image/x-png,image/image/jpeg/png"
@@ -180,7 +202,9 @@ export default function HeroSection({ data, loading }) {
                     />
 
                     <label htmlFor="actual-btn">
-                      <BiImageAdd className="text-9xl cursor-pointer hover:shadow-md bg-gray-200 hover:text-white hover:bg-black focus:outline-none rounded-full p-3" />
+                      <p className="text-sm px-3 py-2 font-medium focus:outline-none cursor-pointer hover:bg-gray-200">
+                        + Add Image
+                      </p>
                     </label>
                   </div>
 
@@ -192,34 +216,16 @@ export default function HeroSection({ data, loading }) {
                       </div>
                     </div>
                   ) : null}
-                  {/* <div>
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => {
-                        if (e.target && e.target.files) {
-                                                      uploadCompanyImages(
-                                                        e.target.files
-                                                      );
-
-                        }
-                      }}
-                      accept="image/x-png,image/image/jpeg/png"
-                      id="actual-btn"
-                      hidden
-                    />
-                    <button className="text-sm font-medium focus:outline-none">
-                      + ADD IMAGE
-                    </button>
-                  </div> */}
 
                   <div>
-                    <button
-                      type="submit"
-                      className="bg-blue-500 text-white px-10 py-2 font-medium focus:outline-none"
-                    >
-                      {isUpdating ? "Please wait..." : "Confirm"}
-                    </button>
+                    {!imageUploadInProgress ? (
+                      <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-10 py-2 font-medium focus:outline-none"
+                      >
+                        {isUpdating ? "Please wait..." : "Confirm"}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
