@@ -50,7 +50,7 @@ export default function Admin() {
           </div>
         </div>
       </div>
-      <div className="flex bg-gray-100 pb-52 w-full px-20 py-10">
+      <div className="flex bg-gray-100 pb-60 w-full px-20 py-10">
         {currentTab === "dashboard" ? (
           <Dashboard />
         ) : currentTab === "enquiry" ? (

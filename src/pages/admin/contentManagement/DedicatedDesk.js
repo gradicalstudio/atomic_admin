@@ -25,7 +25,11 @@ export default function HotDesk() {
     let res = await db
       .collection("atomicLandingPage")
       .doc("Aw6fT3wFRWFsGqqnjJlt")
-      .get();
+      .get()
+      .catch((error) => {
+        toast.error("Failed to fetch data");
+        console.log(error);
+      });
     console.log("Data", res.data());
     setLoading(false);
     setPageData(res.data());
