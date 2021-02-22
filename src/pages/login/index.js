@@ -37,7 +37,7 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="px-3 py-2 border-2 border-gray-400 rounded-sm -mt-16 w-2/3 focus:border-blue-400 outline-none"
-            placeholder="User name"
+            placeholder="Email"
           />
           <input
             type="password"
