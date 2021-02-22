@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "atomic-c6046"
+  },
+  "targets": {
+    "atomic-c6046": {
+      "hosting": {
+        "atomic-admin": [
+          "atomic-admin-27b47"
+        ]
+      }
+    }
+  }
+}
