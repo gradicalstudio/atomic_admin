@@ -19,10 +19,10 @@ export default function Admin() {
               <p>Hey there, Admin.</p>
             </div>
           </div>
-          <div className="flex flex-col gap-10 mx-10 text-gray-500">
+          <div className="flex flex-col gap-10 w-full px-10 text-gray-500">
             <button
               onClick={() => setCurrentTab("dashboard")}
-              className={`flex gap-10 items-center focus:outline-none ${
+              className={`flex gap-5 items-center focus:outline-none ${
                 currentTab === "dashboard" ? "text-white" : ""
               }`}
             >
@@ -31,7 +31,7 @@ export default function Admin() {
             </button>
             <button
               onClick={() => setCurrentTab("enquiry")}
-              className={`flex gap-10 items-center focus:outline-none ${
+              className={`flex gap-5 items-center focus:outline-none ${
                 currentTab === "enquiry" ? "text-white" : ""
               }`}
             >
@@ -40,7 +40,7 @@ export default function Admin() {
             </button>
             <button
               onClick={() => setCurrentTab("contentManagement")}
-              className={`flex gap-10 items-center focus:outline-none ${
+              className={`flex gap-5 items-center focus:outline-none ${
                 currentTab === "contentManagement" ? "text-white" : ""
               }`}
             >

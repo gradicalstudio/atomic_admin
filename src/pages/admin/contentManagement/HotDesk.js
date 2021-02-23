@@ -6,6 +6,7 @@ import { db, storageRef } from "../../../firebase";
 import Loading from "../../../components/Loading";
 import { toast } from "react-toastify";
 import { FaHourglassHalf } from "react-icons/fa";
+import ImageDeleteLoading from "../../../components/ImageDeleteLoading";
 
 const schema = Yup.object().shape({
   heading: Yup.string().nullable().required("Required"),
@@ -15,10 +16,10 @@ const schema = Yup.object().shape({
 export default function HotDesk() {
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState(null);
-  const [isUpdateStatusChanged, setIsUpdateStatusChanged] = useState(null);
   const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
   const [image, setImage] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
 
   const fetchAtomicPageDetails = async () => {
     setLoading(true);
@@ -38,7 +39,7 @@ export default function HotDesk() {
 
   useEffect(() => {
     fetchAtomicPageDetails();
-  }, [isUpdateStatusChanged]);
+  }, []);
 
   const getImageURL = async (image) => {
     var d = new Date();
@@ -79,7 +80,7 @@ export default function HotDesk() {
           })
           .then(() => {
             imagesURLStatus.push(url);
-            setIsUpdateStatusChanged(Math.random());
+            setImage(url);
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -101,7 +102,32 @@ export default function HotDesk() {
 
   const deleteImage = () => {
     if (window.confirm("Are you sure to delete this image?")) {
-      setImage(null);
+      setIsImageDeleting(true);
+      db.collection("atomicLandingPage")
+        .doc("Aw6fT3wFRWFsGqqnjJlt")
+        .update({
+          spaceOverviewSection: {
+            dedicatedDesk: pageData.spaceOverviewSection.dedicatedDesk,
+            hotDesk: {
+              heading: pageData.spaceOverviewSection.hotDesk.heading,
+              image: "",
+              paragraph: pageData.spaceOverviewSection.hotDesk.paragraph,
+            },
+            privateDesk: pageData.spaceOverviewSection.privateDesk,
+          },
+        })
+        .then(() => {
+          setIsImageDeleting(false);
+
+          setImage(null);
+          toast.success("Image deleted successfully");
+        })
+        .catch((error) => {
+          setIsImageDeleting(false);
+
+          console.log(error);
+          toast.error("Failed to delete image...");
+        });
     }
   };
 
@@ -197,7 +223,7 @@ export default function HotDesk() {
                             uploadImages(e.target.files);
                           }
                         }}
-                        accept="image/x-png,image/image/jpeg/png"
+                        accept="image/*"
                         id="actual-btn"
                         hidden
                       />
@@ -219,7 +245,11 @@ export default function HotDesk() {
                           onClick={() => deleteImage()}
                           className="focus:outline-none"
                         >
-                          <BsTrash className="text-red-500 text-xl" />
+                          {!isImageDeleting ? (
+                            <BsTrash className="text-red-500 text-xl" />
+                          ) : (
+                            <ImageDeleteLoading />
+                          )}
                         </button>
                       </div>
                     </div>

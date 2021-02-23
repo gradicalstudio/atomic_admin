@@ -7,12 +7,70 @@ import { db, storageRef } from "../../../firebase";
 
 import { toast } from "react-toastify";
 import { FaHourglassHalf } from "react-icons/fa";
+import ImageDeleteLoading from "../../../components/ImageDeleteLoading";
 
 const schema = Yup.object().shape({
   heading: Yup.string().nullable().required("Required"),
   subHeading1: Yup.string().nullable().required("Required"),
   subHeading2: Yup.string().nullable().required("Required"),
 });
+
+const Images = ({ image, images, pageData, setImages }) => {
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
+
+  const deleteImage = (url) => {
+    if (window.confirm("Are you sure to delete this image? ")) {
+      setIsImageDeleting(true);
+      db.collection("atomicLandingPage")
+        .doc("Aw6fT3wFRWFsGqqnjJlt")
+        .update({
+          runYourEvent: {
+            heading: pageData.runYourEvent.heading,
+            images: images.filter((el) => el !== url),
+            paragraphs: pageData.runYourEvent.paragraphs,
+          },
+        })
+        .then(() => {
+          setImages(images.filter((el) => el !== url));
+          setIsImageDeleting(false);
+          toast.success("Image deleted successfully");
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsImageDeleting(false);
+          toast.error("Failed to delete image...");
+        });
+
+      //console.log("Images", pageData.runYourEvent.images);
+    }
+  };
+  return (
+    <div>
+      <div className=" h-40 w-40 overflow-auto">
+        <img src={image} alt="" />
+      </div>
+      <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
+        <button
+          type="button"
+          onClick={() => {
+            if (images.length > 1) {
+              deleteImage(image);
+            } else {
+              toast.error("Atleast one image is required...");
+            }
+          }}
+          className="focus:outline-none"
+        >
+          {!isImageDeleting ? (
+            <BsTrash className="text-red-500 text-xl" />
+          ) : (
+            <ImageDeleteLoading />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function EventsSection() {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -41,7 +99,7 @@ export default function EventsSection() {
 
   useEffect(() => {
     fetchAtomicPageDetails();
-  }, [isUpdateStatusChanged]);
+  }, []);
 
   const getImageURL = async (image) => {
     var d = new Date();
@@ -80,7 +138,7 @@ export default function EventsSection() {
           })
           .then(() => {
             imagesURLStatus.push(url);
-            setIsUpdateStatusChanged(Math.random());
+            setImages([...images, url]);
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -100,13 +158,6 @@ export default function EventsSection() {
     }
   };
 
-  const deleteImage = (url) => {
-    if (window.confirm("Are you sure to delete this image? ")) {
-      setImages(images.filter((el) => el !== url));
-
-      //console.log("Images", pageData.runYourEvent.images);
-    }
-  };
   if (!loading && pageData) {
     return (
       <Formik
@@ -211,28 +262,12 @@ export default function EventsSection() {
                     {images
                       ? images.map((image) => {
                           return (
-                            <div>
-                              <div className=" h-40 w-40 overflow-auto">
-                                <img src={image} alt="" />
-                              </div>
-                              <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (images.length > 1) {
-                                      deleteImage(image, values.subHeading);
-                                    } else {
-                                      toast.error(
-                                        "Atleast one image is required..."
-                                      );
-                                    }
-                                  }}
-                                  className="focus:outline-none"
-                                >
-                                  <BsTrash className="text-red-500 text-xl" />
-                                </button>
-                              </div>
-                            </div>
+                            <Images
+                              image={image}
+                              images={images}
+                              pageData={pageData}
+                              setImages={setImages}
+                            />
                           );
                         })
                       : null}
@@ -245,7 +280,7 @@ export default function EventsSection() {
                           uploadImages(e.target.files);
                         }
                       }}
-                      accept="image/x-png,image/image/jpeg/png"
+                      accept="image/*"
                       id="actual-btn"
                       hidden
                     />

@@ -6,18 +6,73 @@ import Loading from "../../../components/Loading";
 import { db, storageRef } from "../../../firebase";
 import { toast } from "react-toastify";
 import { FaHourglassHalf } from "react-icons/fa";
+import ImageDeleteLoading from "../../../components/ImageDeleteLoading";
 
 const schema = Yup.object().shape({
   subHeading: Yup.string().nullable().required("Required"),
 });
+
+const Images = ({ image, pageData, images, setImages }) => {
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
+
+  const deleteImage = (url) => {
+    if (window.confirm("Are you sure to delete this image? ")) {
+      setIsImageDeleting(true);
+
+      db.collection("atomicLandingPage")
+        .doc("Aw6fT3wFRWFsGqqnjJlt")
+        .update({
+          heroSection: {
+            heroSubTitle: pageData.heroSection.heroSubTitle,
+            images: images.filter((el) => el !== url),
+          },
+        })
+        .then(() => {
+          setIsImageDeleting(false);
+          setImages(images.filter((el) => el !== url));
+          toast.success("Image deleted successfully");
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsImageDeleting(false);
+
+          toast.error("Failed to delete image...");
+        });
+    }
+  };
+  return (
+    <div>
+      <div className=" h-40 w-40 overflow-auto">
+        <img src={image} alt="" />
+      </div>
+      <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
+        <button
+          type="button"
+          onClick={() => {
+            if (images.length > 1) {
+              deleteImage(image);
+            } else {
+              toast.error("At least one image is required...");
+            }
+          }}
+          className="focus:outline-none"
+        >
+          {!isImageDeleting ? (
+            <BsTrash className="text-red-500 text-xl" />
+          ) : (
+            <ImageDeleteLoading />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function HeroSection() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState(null);
-  const [isUpdateStatusChanged, setIsUpdateStatusChanged] = useState(null);
-
   const [images, setImages] = useState(null);
 
   const fetchAtomicPageDetails = async () => {
@@ -38,7 +93,7 @@ export default function HeroSection() {
 
   useEffect(() => {
     fetchAtomicPageDetails();
-  }, [isUpdateStatusChanged]);
+  }, []);
 
   const getImageURL = async (image) => {
     var d = new Date();
@@ -74,7 +129,7 @@ export default function HeroSection() {
           })
           .then(() => {
             imagesURLStatus.push(url);
-            setIsUpdateStatusChanged(Math.random());
+            setImages([...images, url]);
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -91,12 +146,6 @@ export default function HeroSection() {
     } else {
       toast.error("Checking error!");
       setImageUploadInProgress(false);
-    }
-  };
-
-  const deleteImage = (url) => {
-    if (window.confirm("Are you sure to delete this image? ")) {
-      setImages(images.filter((el) => el !== url));
     }
   };
 
@@ -165,28 +214,12 @@ export default function HeroSection() {
                     {images
                       ? images.map((image) => {
                           return (
-                            <div>
-                              <div className=" h-40 w-40 overflow-auto">
-                                <img src={image} alt="" />
-                              </div>
-                              <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (images.length > 1) {
-                                      deleteImage(image);
-                                    } else {
-                                      toast.error(
-                                        "At least one image is required..."
-                                      );
-                                    }
-                                  }}
-                                  className="focus:outline-none"
-                                >
-                                  <BsTrash className="text-red-500 text-xl" />
-                                </button>
-                              </div>
-                            </div>
+                            <Images
+                              image={image}
+                              pageData={pageData}
+                              images={images}
+                              setImages={setImages}
+                            />
                           );
                         })
                       : null}
@@ -200,7 +233,7 @@ export default function HeroSection() {
                           uploadImages(e.target.files);
                         }
                       }}
-                      accept="image/x-png,image/image/jpeg/png"
+                      accept="image/*"
                       id="actual-btn"
                       hidden
                     />

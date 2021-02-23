@@ -48,7 +48,7 @@ export default function ContentManagement() {
             currentSection === "privateOffice" ? "text-black" : "text-gray-400 "
           }`}
         >
-          Private Office
+          Private Desk
         </button>
         <button
           onClick={() => setCurrentSection("eventSection")}

@@ -6,6 +6,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { FaHourglassHalf } from "react-icons/fa";
 import { toast } from "react-toastify";
+import ImageDeleteLoading from "../../../components/ImageDeleteLoading";
 
 const schema = Yup.object().shape({
   heading: Yup.string().nullable().required("Required"),
@@ -15,10 +16,10 @@ const schema = Yup.object().shape({
 export default function PrivateOffice() {
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState(null);
-  const [isUpdateStatusChanged, setIsUpdateStatusChanged] = useState(null);
   const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
   const [image, setImage] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
 
   const fetchAtomicPageDetails = async () => {
     setLoading(true);
@@ -38,7 +39,7 @@ export default function PrivateOffice() {
 
   useEffect(() => {
     fetchAtomicPageDetails();
-  }, [isUpdateStatusChanged]);
+  }, []);
 
   const getImageURL = async (image) => {
     var d = new Date();
@@ -79,7 +80,7 @@ export default function PrivateOffice() {
           })
           .then(() => {
             imagesURLStatus.push(url);
-            setIsUpdateStatusChanged(Math.random());
+            setImage(url);
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -101,7 +102,32 @@ export default function PrivateOffice() {
 
   const deleteImage = () => {
     if (window.confirm("Are you sure to delete this image?")) {
-      setImage(null);
+      setIsImageDeleting(true);
+      db.collection("atomicLandingPage")
+        .doc("Aw6fT3wFRWFsGqqnjJlt")
+        .update({
+          spaceOverviewSection: {
+            dedicatedDesk: pageData.spaceOverviewSection.dedicatedDesk,
+            hotDesk: pageData.spaceOverviewSection.hotDesk,
+            privateDesk: {
+              heading: pageData.spaceOverviewSection.privateDesk.heading,
+              image: "",
+              paragraph: pageData.spaceOverviewSection.privateDesk.paragraph,
+            },
+          },
+        })
+        .then(() => {
+          setIsImageDeleting(false);
+
+          setImage(null);
+          toast.success("Image deleted successfully");
+        })
+        .catch((error) => {
+          setIsImageDeleting(false);
+
+          console.log(error);
+          toast.error("Failed to delete image...");
+        });
     }
   };
 
@@ -151,7 +177,7 @@ export default function PrivateOffice() {
             <Form>
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-7">
-                  <p className="text-xl font-bold">PRIVATE OFFICE</p>
+                  <p className="text-xl font-bold">PRIVATE DESK</p>
                   <p className="text-gray-400">
                     Edit contents, add images to the Private office section
                     here.
@@ -198,7 +224,7 @@ export default function PrivateOffice() {
                             uploadImages(e.target.files);
                           }
                         }}
-                        accept="image/x-png,image/image/jpeg/png"
+                        accept="image/*"
                         id="actual-btn"
                         hidden
                       />
@@ -220,7 +246,11 @@ export default function PrivateOffice() {
                           onClick={() => deleteImage()}
                           className="focus:outline-none"
                         >
-                          <BsTrash className="text-red-500 text-xl" />
+                          {!isImageDeleting ? (
+                            <BsTrash className="text-red-500 text-xl" />
+                          ) : (
+                            <ImageDeleteLoading />
+                          )}
                         </button>
                       </div>
                     </div>
