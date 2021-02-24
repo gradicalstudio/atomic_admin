@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { AiFillThunderbolt } from "react-icons/ai";
-import { MdDashboard } from "react-icons/md";
-import { IoIosRocket } from "react-icons/io";
 import { BiBookContent } from "react-icons/bi";
+import { IoIosRocket } from "react-icons/io";
+import { MdDashboard } from "react-icons/md";
+import Logo from "../../assets/Vector.png";
+import ContentManagement from "./contentManagement";
 import Dashboard from "./dashboard";
 import Enquiry from "./enquiry";
-import ContentManagement from "./contentManagement";
 
 export default function Admin() {
   const [currentTab, setCurrentTab] = useState("dashboard");
@@ -15,7 +15,7 @@ export default function Admin() {
         <div className="flex flex-col gap-14 w-full">
           <div className="flex justify-center w-full">
             <div className="my-10 flex items-center flex-col gap-14 text-white">
-              <AiFillThunderbolt className="text-5xl" />
+              <img src={Logo} alt="" width={25} />
               <p>Hey there, Admin.</p>
             </div>
           </div>

@@ -26,12 +26,12 @@ export default function TabHeader({ title, subTitle }) {
         </div>
 
         {isLogoutPopupOpen ? (
-          <div className="flex justify-center p-2 bg-white hover:bg-black hover:text-white cursor-pointer">
+          <div>
             <button
               onClick={() => {
                 firebase.auth().signOut();
               }}
-              className="outline-none focus:outline-none"
+              className="flex w-full justify-center p-2 bg-white hover:bg-black hover:text-white outline-none focus:outline-none  cursor-pointer"
             >
               Logout
             </button>
