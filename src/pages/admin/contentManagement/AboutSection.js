@@ -1,25 +1,83 @@
 import React, { useState, useEffect } from "react";
 import { BsTrash } from "react-icons/bs";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Field, Formik, ErrorMessage, Form } from "formik";
 import * as Yup from "yup";
-import { db, storageRef } from "../../../firebase";
 import Loading from "../../../components/Loading";
+import { db, storageRef } from "../../../firebase";
 import { toast } from "react-toastify";
 import { FaHourglassHalf } from "react-icons/fa";
 import ImageDeleteLoading from "../../../components/ImageDeleteLoading";
 
 const schema = Yup.object().shape({
-  heading: Yup.string().nullable().required("Required"),
-  subHeading: Yup.string().nullable().required("Required"),
+  header: Yup.string().nullable().required("Required"),
+  paragraph1: Yup.string().nullable().required("Required"),
+
+  paragraph2: Yup.string().nullable().required("Required"),
 });
 
-export default function DedicatedDesk() {
+const Images = ({ image, pageData, images, setImages }) => {
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
+
+  const deleteImage = (url) => {
+    if (window.confirm("Are you sure to delete this image? ")) {
+      setIsImageDeleting(true);
+
+      db.collection("atomicLandingPage")
+        .doc("Aw6fT3wFRWFsGqqnjJlt")
+        .update({
+          aboutSection: {
+            header: pageData.aboutSection.header,
+            images: images.filter((el) => el !== url),
+            paragraphs: pageData.aboutSection.paragraphs,
+          },
+        })
+        .then(() => {
+          setIsImageDeleting(false);
+          setImages(images.filter((el) => el !== url));
+          toast.success("Image deleted successfully");
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsImageDeleting(false);
+
+          toast.error("Failed to delete image...");
+        });
+    }
+  };
+  return (
+    <div>
+      <div className=" h-40 w-40 overflow-auto">
+        <img src={image} alt="" />
+      </div>
+      <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
+        <button
+          type="button"
+          onClick={() => {
+            if (images.length > 1) {
+              deleteImage(image);
+            } else {
+              toast.error("At least one image is required...");
+            }
+          }}
+          className="focus:outline-none"
+        >
+          {!isImageDeleting ? (
+            <BsTrash className="text-red-500 text-xl" />
+          ) : (
+            <ImageDeleteLoading />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function AboutSection() {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState(null);
-  const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
-  const [image, setImage] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isImageDeleting, setIsImageDeleting] = useState(false);
+  const [images, setImages] = useState(null);
 
   const fetchAtomicPageDetails = async () => {
     setLoading(true);
@@ -34,7 +92,7 @@ export default function DedicatedDesk() {
     console.log("Data", res.data());
     setLoading(false);
     setPageData(res.data());
-    setImage(res.data().spaceOverviewSection.dedicatedDesk.image);
+    setImages(res.data().aboutSection.images);
   };
 
   useEffect(() => {
@@ -45,7 +103,7 @@ export default function DedicatedDesk() {
     var d = new Date();
     var n = d.getTime();
     const fileRef = storageRef
-      .ref("dedicatedDesk/images/")
+      .ref("aboutSection/images/")
       .child(image.name + n);
     await fileRef.put(image).catch((error) => {
       toast.error("Failed to upload picture!...");
@@ -70,20 +128,15 @@ export default function DedicatedDesk() {
         db.collection("atomicLandingPage")
           .doc("Aw6fT3wFRWFsGqqnjJlt")
           .update({
-            spaceOverviewSection: {
-              dedicatedDesk: {
-                heading: pageData.spaceOverviewSection.dedicatedDesk.heading,
-                image: url,
-                paragraph:
-                  pageData.spaceOverviewSection.dedicatedDesk.paragraph,
-              },
-              hotDesk: pageData.spaceOverviewSection.hotDesk,
-              privateDesk: pageData.spaceOverviewSection.privateDesk,
+            aboutSection: {
+              header: pageData.aboutSection.header,
+              images: [...images, url],
+              paragraphs: pageData.aboutSection.paragraphs,
             },
           })
           .then(() => {
             imagesURLStatus.push(url);
-            setImage(url);
+            setImages([...images, url]);
           })
           .catch((error) => {
             toast.error("Failed to upload image...");
@@ -103,65 +156,34 @@ export default function DedicatedDesk() {
     }
   };
 
-  const deleteImage = () => {
-    if (window.confirm("Are you sure to delete this image?")) {
-      setIsImageDeleting(true);
-      db.collection("atomicLandingPage")
-        .doc("Aw6fT3wFRWFsGqqnjJlt")
-        .update({
-          spaceOverviewSection: {
-            dedicatedDesk: {
-              heading: pageData.spaceOverviewSection.dedicatedDesk.heading,
-              image: "",
-              paragraph: pageData.spaceOverviewSection.dedicatedDesk.paragraph,
-            },
-            hotDesk: pageData.spaceOverviewSection.hotDesk,
-            privateDesk: pageData.spaceOverviewSection.privateDesk,
-          },
-        })
-        .then(() => {
-          setIsImageDeleting(false);
-
-          setImage(null);
-          toast.success("Image deleted successfully");
-        })
-        .catch((error) => {
-          setIsImageDeleting(false);
-
-          console.log(error);
-          toast.error("Failed to delete image...");
-        });
-    }
-  };
-
   if (!loading && pageData) {
     return (
       <Formik
         initialValues={{
-          heading:
-            pageData && pageData.spaceOverviewSection.dedicatedDesk.heading
-              ? pageData.spaceOverviewSection.dedicatedDesk.heading
+          header:
+            pageData && pageData.aboutSection.header
+              ? pageData.aboutSection.header
               : "",
-          subHeading:
-            pageData && pageData.spaceOverviewSection.dedicatedDesk.paragraph
-              ? pageData.spaceOverviewSection.dedicatedDesk.paragraph
+          paragraph1:
+            pageData && pageData.aboutSection.paragraphs[0]
+              ? pageData.aboutSection.paragraphs[0]
+              : "",
+          paragraph2:
+            pageData && pageData.aboutSection.paragraphs[1]
+              ? pageData.aboutSection.paragraphs[1]
               : "",
         }}
         validationSchema={schema}
         onSubmit={(values) => {
-          if (image) {
+          if (images.length >= 1) {
             setIsUpdating(true);
             db.collection("atomicLandingPage")
               .doc("Aw6fT3wFRWFsGqqnjJlt")
               .update({
-                spaceOverviewSection: {
-                  dedicatedDesk: {
-                    heading: values.heading,
-                    image: image,
-                    paragraph: values.subHeading,
-                  },
-                  hotDesk: pageData.spaceOverviewSection.hotDesk,
-                  privateDesk: pageData.spaceOverviewSection.privateDesk,
+                aboutSection: {
+                  header: values.header,
+                  images: images,
+                  paragraphs: [values.paragraph1, values.paragraph2],
                 },
               })
               .then(() => {
@@ -169,30 +191,29 @@ export default function DedicatedDesk() {
                 toast.success("Changes saved successfully...");
               });
           } else {
-            toast.error("Image is required...");
+            toast.error("Atleast one photo is required...");
           }
         }}
       >
-        {({ errors }) => {
+        {({ values, errors }) => {
           console.log(errors);
           return (
             <Form>
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-7">
-                  <p className="text-xl font-bold">DEDICATED-DESK</p>
+                  <p className="text-xl font-bold">ABOUT SECTION</p>
                   <p className="text-gray-400">
-                    Edit contents, add images to the Dedicated desk section
-                    here.
+                    Edit contents, add images to the About section here.
                   </p>
                 </div>
                 <div className="flex flex-col gap-5">
                   <p className="text-md text-blue-500 font-medium">TITLE</p>
                   <Field
-                    name="heading"
+                    name="header"
                     className="px-3 py-2 bg-gray-100  border-2 border-gray-400 rounded-lg font-medium w-2/3 focus:border-blue-400 outline-none"
                   />
                   <ErrorMessage
-                    name="heading"
+                    name="header"
                     render={(msg) => (
                       <div className="text-red-600 text-sm">{msg}</div>
                     )}
@@ -200,16 +221,33 @@ export default function DedicatedDesk() {
                 </div>
                 <div className="flex flex-col gap-5">
                   <p className="text-md text-blue-500 font-medium">
-                    SUB-HEADING
+                    PARAGRAPH - 1
                   </p>
                   <Field
                     as="textarea"
-                    name="subHeading"
+                    name="paragraph1"
                     rows={4}
                     className="px-3 py-2 bg-gray-100  border-2 border-gray-400 rounded-lg font-medium w-2/3 focus:border-blue-400 outline-none"
                   />
                   <ErrorMessage
-                    name="subHeading"
+                    name="paragraph1"
+                    render={(msg) => (
+                      <div className="text-red-600 text-sm">{msg}</div>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-5">
+                  <p className="text-md text-blue-500 font-medium">
+                    PARAGRAPH - 2
+                  </p>
+                  <Field
+                    as="textarea"
+                    name="paragraph2"
+                    rows={4}
+                    className="px-3 py-2 bg-gray-100  border-2 border-gray-400 rounded-lg font-medium w-2/3 focus:border-blue-400 outline-none"
+                  />
+                  <ErrorMessage
+                    name="paragraph2"
                     render={(msg) => (
                       <div className="text-red-600 text-sm">{msg}</div>
                     )}
@@ -217,8 +255,22 @@ export default function DedicatedDesk() {
                 </div>
                 <div className="flex flex-col gap-5">
                   <p className="text-md text-blue-500 font-medium">IMAGES</p>
+                  <div className="grid grid-cols-4 gap-5">
+                    {images
+                      ? images.map((image) => {
+                          return (
+                            <Images
+                              image={image}
+                              pageData={pageData}
+                              images={images}
+                              setImages={setImages}
+                            />
+                          );
+                        })
+                      : null}
+                  </div>
 
-                  {!image ? (
+                  {images && images.length !== 3 ? (
                     <div className="flex justify-start">
                       <input
                         type="file"
@@ -238,26 +290,7 @@ export default function DedicatedDesk() {
                         </p>
                       </label>
                     </div>
-                  ) : (
-                    <div>
-                      <div className=" h-40 w-40 overflow-auto">
-                        <img src={image} alt="" />
-                      </div>
-                      <div className="flex justify-end w-40 px-3 py-2 bg-gray-100">
-                        <button
-                          type="button"
-                          onClick={() => deleteImage()}
-                          className="focus:outline-none"
-                        >
-                          {!isImageDeleting ? (
-                            <BsTrash className="text-red-500 text-xl" />
-                          ) : (
-                            <ImageDeleteLoading />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  ) : null}
 
                   {imageUploadInProgress ? (
                     <div className="flex lg:justify-end justify-center mt-5">
@@ -266,16 +299,18 @@ export default function DedicatedDesk() {
                         <p>Uploading</p>
                       </div>
                     </div>
-                  ) : (
-                    <div>
+                  ) : null}
+
+                  <div>
+                    {!imageUploadInProgress ? (
                       <button
                         type="submit"
                         className="bg-blue-500 text-white px-10 py-2 font-medium focus:outline-none"
                       >
                         {isUpdating ? "Please wait..." : "Confirm"}
                       </button>
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </Form>

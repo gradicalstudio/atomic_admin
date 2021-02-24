@@ -6,6 +6,7 @@ import HotDesk from "./HotDesk";
 import DedicatedDesk from "./DedicatedDesk";
 import PrivateOffice from "./PrivateOffice";
 import EventsSection from "./EventsSection";
+import AboutSection from "./AboutSection";
 
 export default function ContentManagement() {
   const [currentSection, setCurrentSection] = useState("heroSection");
@@ -25,6 +26,14 @@ export default function ContentManagement() {
           }`}
         >
           Hero Section
+        </button>
+        <button
+          onClick={() => setCurrentSection("aboutSection")}
+          className={`text-xl font-medium focus:outline-none ${
+            currentSection === "aboutSection" ? "text-black" : "text-gray-400 "
+          }`}
+        >
+          About Section
         </button>
         <button
           onClick={() => setCurrentSection("hotDesk")}
@@ -71,6 +80,8 @@ export default function ContentManagement() {
           <PrivateOffice />
         ) : currentSection === "eventSection" ? (
           <EventsSection />
+        ) : currentSection === "aboutSection" ? (
+          <AboutSection />
         ) : (
           <p>Other section</p>
         )}
