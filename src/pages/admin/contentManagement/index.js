@@ -18,10 +18,10 @@ export default function ContentManagement() {
         subTitle="Manage the website's content here, from the images to the title in our landing page."
       />
 
-      <div className="flex gap-14 items-center">
+      <div className="flex gap-10 items-center">
         <button
           onClick={() => setCurrentSection("heroSection")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "heroSection" ? "text-black" : "text-gray-400 "
           }`}
         >
@@ -29,7 +29,7 @@ export default function ContentManagement() {
         </button>
         <button
           onClick={() => setCurrentSection("aboutSection")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "aboutSection" ? "text-black" : "text-gray-400 "
           }`}
         >
@@ -37,7 +37,7 @@ export default function ContentManagement() {
         </button>
         <button
           onClick={() => setCurrentSection("hotDesk")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "hotDesk" ? "text-black" : "text-gray-400 "
           }`}
         >
@@ -45,7 +45,7 @@ export default function ContentManagement() {
         </button>
         <button
           onClick={() => setCurrentSection("dedicatedDesk")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "dedicatedDesk" ? "text-black" : "text-gray-400 "
           }`}
         >
@@ -53,7 +53,7 @@ export default function ContentManagement() {
         </button>
         <button
           onClick={() => setCurrentSection("privateOffice")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "privateOffice" ? "text-black" : "text-gray-400 "
           }`}
         >
@@ -61,7 +61,7 @@ export default function ContentManagement() {
         </button>
         <button
           onClick={() => setCurrentSection("eventSection")}
-          className={`text-xl font-medium focus:outline-none ${
+          className={`text-base font-medium focus:outline-none ${
             currentSection === "eventSection" ? "text-black" : "text-gray-400 "
           }`}
         >

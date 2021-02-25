@@ -26,8 +26,8 @@ export default function Admin() {
                 currentTab === "dashboard" ? "text-white" : ""
               }`}
             >
-              <MdDashboard className="text-xl" />
-              <p>Dashboard</p>
+              <MdDashboard className="text-sm" />
+              <p className="text-xs">Dashboard</p>
             </button>
             <button
               onClick={() => setCurrentTab("enquiry")}
@@ -35,8 +35,8 @@ export default function Admin() {
                 currentTab === "enquiry" ? "text-white" : ""
               }`}
             >
-              <IoIosRocket className="text-xl" />
-              <p>Enquiry</p>
+              <IoIosRocket className="text-sm" />
+              <p className="text-xs">Enquiry</p>
             </button>
             <button
               onClick={() => setCurrentTab("contentManagement")}
@@ -44,8 +44,8 @@ export default function Admin() {
                 currentTab === "contentManagement" ? "text-white" : ""
               }`}
             >
-              <BiBookContent className="text-xl" />
-              <p>Content Management</p>
+              <BiBookContent className="text-sm" />
+              <p className="text-xs">Content Management</p>
             </button>
           </div>
         </div>
