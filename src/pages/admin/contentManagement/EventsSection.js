@@ -77,7 +77,6 @@ export default function EventsSection() {
   const [imageUploadInProgress, setImageUploadInProgress] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState(null);
-  const [isUpdateStatusChanged, setIsUpdateStatusChanged] = useState(null);
 
   const [images, setImages] = useState(null);
 
@@ -132,7 +131,7 @@ export default function EventsSection() {
           .update({
             runYourEvent: {
               heading: pageData.runYourEvent.heading,
-              images: [...pageData.runYourEvent.images, url],
+              images: [...images, url],
               paragraphs: pageData.runYourEvent.paragraphs,
             },
           })

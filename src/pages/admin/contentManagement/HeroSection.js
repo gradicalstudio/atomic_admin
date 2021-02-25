@@ -124,7 +124,7 @@ export default function HeroSection() {
           .update({
             heroSection: {
               heroSubTitle: pageData.heroSection.heroSubTitle,
-              images: [...pageData.heroSection.images, url],
+              images: [...images, url],
             },
           })
           .then(() => {
