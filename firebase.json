@@ -1,7 +1,7 @@
 {
   "hosting": {
-    "target" : "atomic-admin",
     "public": "build",
+    "target" : "atomic-admin",
     "ignore": [
       "firebase.json",
       "**/.*",

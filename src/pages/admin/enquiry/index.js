@@ -5,11 +5,10 @@ import { toast } from "react-toastify";
 import { db } from "../../../firebase";
 import EnquiryCard from "../../../components/EnquiryCard";
 import Loading from "../../../components/Loading";
-import EnquiryDetailModal from "../../../components/EnquiryDetailModal";
 
 export default function Enquiry() {
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [enquiries, setEnquiries] = useState(null);
 
   const fetchEnquiryDetails = async () => {
@@ -48,26 +47,12 @@ export default function Enquiry() {
         <div className="grid grid-cols-2 gap-5">
           {enquiries && enquiries.length > 0 ? (
             enquiries.map((el, index) => {
-              return (
-                <EnquiryCard
-                  data={el}
-                  index={index + 1}
-                  setIsModalOpen={setIsModalOpen}
-                />
-              );
+              return <EnquiryCard data={el} index={index + 1} />;
             })
           ) : (
             <p>No enquiries for available...</p>
           )}
         </div>
-
-        {isModalOpen ? (
-          <EnquiryDetailModal
-            data={enquiries[isModalOpen - 1]}
-            isModalOpen={isModalOpen}
-            setIsModalOpen={setIsModalOpen}
-          />
-        ) : null}
       </div>
     );
   }
